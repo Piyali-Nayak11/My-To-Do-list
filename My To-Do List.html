@@ -9,10 +9,10 @@
     :root {
       --bg: #fdf3f6;
       --card: #ffffff;
-      --text: #2b2230;
-      --muted: #8a7d90;
-      --accent: #c2417a;
-      --line: #f0d9e3;
+      --text: #837e85;
+      --muted: #7e7384;
+      --accent: #1584d3;
+      --line: #72646a;
       box-sizing: border-box;
       padding-top: env(safe-area-inset-top, 0px);
       padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -21,12 +21,12 @@
     /* Dark mode colours (used automatically if the phone or laptop is in dark mode) */
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
-        --bg: #1d1722;
-        --card: #2a2230;
-        --text: #f4ecf6;
-        --muted: #a898b0;
-        --accent: #e873aa;
-        --line: #3d3246;
+        --bg: #dc9ccc;
+        --card: #583872;
+        --text: #ffffff;
+        --muted: #dc8d95;
+        --accent: #d8488b;
+        --line: #57515c;
         color-scheme: dark;
       }
     }
@@ -39,7 +39,7 @@
       font-family: Georgia, "Times New Roman", serif;
       display: flex;
       justify-content: center;
-      padding: 40px 16px;
+      padding: 60px 16px;
     }
 
     /* The white box in the middle */
@@ -62,9 +62,9 @@
       padding: 10px 12px;
       font-size: 16px;
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--bg);
-      color: var(--text);
+      color: rgb(50, 68, 205);
     }
     button {
       cursor: pointer;
@@ -72,7 +72,7 @@
       border: none;
       border-radius: 8px;
     }
-    .add-btn { background: var(--accent); color: #fff; padding: 10px 16px; }
+    .add-btn { background: var(--accent); color: #ffffff; padding: 10px 16px; }
 
     /* The list of tasks */
     ul { list-style: none; margin: 0; padding: 0; }
