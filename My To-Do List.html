@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>My To-Do List</title>
+  <style>
+    /* ---------- COLOURS (change these to restyle the whole app) ---------- */
+    :root {
+      --bg: #fdf3f6;
+      --card: #ffffff;
+      --text: #2b2230;
+      --muted: #8a7d90;
+      --accent: #c2417a;
+      --line: #f0d9e3;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      color-scheme: light;
+    }
+    /* Dark mode colours (used automatically if the phone or laptop is in dark mode) */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1d1722;
+        --card: #2a2230;
+        --text: #f4ecf6;
+        --muted: #a898b0;
+        --accent: #e873aa;
+        --line: #3d3246;
+        color-scheme: dark;
+      }
+    }
+
+    /* ---------- PAGE ---------- */
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    /* The white box in the middle */
+    .app {
+      background: var(--card);
+      width: 100%;
+      max-width: 420px;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--line);
+    }
+
+    h1 { margin: 0 0 4px; font-size: 28px; }
+    .count { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+
+    /* Text box + button in one row */
+    .add-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    button {
+      cursor: pointer;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+    }
+    .add-btn { background: var(--accent); color: #fff; padding: 10px 16px; }
+
+    /* The list of tasks */
+    ul { list-style: none; margin: 0; padding: 0; }
+    li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    li span { flex: 1; }
+    /* A finished task gets a line through it */
+    li.done span { text-decoration: line-through; color: var(--muted); }
+    .delete-btn { background: none; color: var(--muted); font-size: 18px; }
+    .delete-btn:hover { color: var(--accent); }
+
+    .empty { color: var(--muted); text-align: center; padding: 16px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ---------- HTML: the structure of the page ---------- -->
+  <div class="app">
+    <h1>My To-Do List</h1>
+    <p class="count" id="count"></p>
+
+    <div class="add-row">
+      <input type="text" id="taskInput" placeholder="Write a task…">
+      <button class="add-btn" id="addBtn">Add task</button>
+    </div>
+
+    <!-- JavaScript will put the tasks inside this list -->
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    // ---------- JAVASCRIPT: the brain of the app ----------
+
+    // 1. Grab the parts of the page we need to use
+    const taskInput = document.getElementById("taskInput");
+    const addBtn = document.getElementById("addBtn");
+    const taskList = document.getElementById("taskList");
+    const count = document.getElementById("count");
+
+    // 2. This array (list) stores all our tasks.
+    // Each task looks like: { text: "Buy milk", done: false }
+    let tasks = [];
+
+    // 3. Load saved tasks from the browser (so they stay after refresh)
+    try {
+      const saved = localStorage.getItem("myTasks");
+      if (saved) {
+        tasks = JSON.parse(saved);
+      }
+    } catch (error) {
+      tasks = []; // if saving is not allowed, just start with an empty list
+    }
+
+    // 4. Save the tasks in the browser
+    function saveTasks() {
+      try {
+        localStorage.setItem("myTasks", JSON.stringify(tasks));
+      } catch (error) {
+        // do nothing if saving is not allowed
+      }
+    }
+
+    // 5. Show all tasks on the page
+    function showTasks() {
+      taskList.innerHTML = ""; // clear the list first
+
+      // If there are no tasks, show a friendly message
+      if (tasks.length === 0) {
+        taskList.innerHTML = '<li class="empty">No tasks yet. Add your first one above.</li>';
+      }
+
+      // Go through every task, one by one
+      for (let i = 0; i < tasks.length; i++) {
+        const li = document.createElement("li"); // make a new list item
+
+        // If the task is done, add the "done" class (CSS adds the line-through)
+        if (tasks[i].done) {
+          li.classList.add("done");
+        }
+
+        // The checkbox
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = tasks[i].done;
+        checkbox.onchange = function () {
+          tasks[i].done = checkbox.checked; // update the task
+          saveTasks();
+          showTasks(); // redraw the list
+        };
+
+        // The task text
+        const span = document.createElement("span");
+        span.textContent = tasks[i].text;
+
+        // The delete button
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "✕";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.onclick = function () {
+          tasks.splice(i, 1); // remove 1 task at position i
+          saveTasks();
+          showTasks();
+        };
+
+        // Put the pieces inside the list item, then inside the list
+        li.appendChild(checkbox);
+        li.appendChild(span);
+        li.appendChild(deleteBtn);
+        taskList.appendChild(li);
+      }
+
+      // Update the small text: "2 of 5 tasks done"
+      let doneCount = 0;
+      for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].done) {
+          doneCount++;
+        }
+      }
+      count.textContent = doneCount + " of " + tasks.length + " tasks done";
+    }
+
+    // 6. Add a new task
+    function addTask() {
+      const text = taskInput.value.trim(); // trim() removes extra spaces
+
+      // Don't add empty tasks
+      if (text === "") {
+        return;
+      }
+
+      tasks.push({ text: text, done: false }); // add to the end of the list
+      taskInput.value = ""; // clear the text box
+      saveTasks();
+      showTasks();
+    }
+
+    // 7. Run addTask when the button is clicked
+    addBtn.onclick = addTask;
+
+    // Also add the task when the Enter key is pressed
+    taskInput.onkeydown = function (event) {
+      if (event.key === "Enter") {
+        addTask();
+      }
+    };
+
+    // 8. Show the tasks when the page first opens
+    showTasks();
+  </script>
+</body>
+</html>
